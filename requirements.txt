@@ -1,0 +1,48 @@
+##pip install en la terminal
+
+Flask
+pyodbc
+python-dotenv
+
+##para iniciar el proyecto:
+
+## 1. iniciar el entorno virtual .\venv\Scripts\activate
+## 2. para ejecutar el proyecto python .\app.py
+## 3. En postman o en insomnia lanzar las solicitudes GET, POST, PUT, DELETE.
+## 4. terminar el proyecto haciendo las solicitudes que faltan, PUT, DELETE. 
+
+# Para probar:
+
+# En POSTAM o Insomnia envíe las 4 solicitudes básicas CRUD, asi:
+
+# GET: http://127.0.0.1:5000/libros
+# Devuelve los registros de la tabla tbLibros
+
+# POST: Aquí solo se puede enviar un registro a la vez
+
+# http://127.0.0.1:5000/libros
+
+{
+    "tituloLibro": "Diccionario Legua Chicago",
+    "anioPublicacion": 1612,
+    "idAutor": 2,
+    "idEditorial": 2
+}
+
+# PUT: Aqui solo se puede actualizar un registro a la vez, cambia el nombre del campo tituloLibro:
+
+# http://127.0.0.1:5000/libros/3
+
+{
+	"tituloLibro": "Cuentos de Thomas Carrasquilla"
+}
+
+# DELETE: solo se envia el idLibro a eliminar, en la url
+
+# http://127.0.0.1:5000/libros/3 
+
+# Agregar los Crud para las 2 tablas mas, 
+# Con la posibilidad de enviar registros masivos, 
+# de poder elegir si eliminar entre id o nombreLibro, eliminar masivos
+# Hacer un Get con opcion de filtros
+
