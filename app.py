@@ -3,6 +3,9 @@ from  dataBase.db_connection import get_db_connection
 
 app = Flask(__name__)
 
+
+###########-- Metodos CRUD para tabla Libros --###########
+
 # EndPoint (rutas) para obtener los detalles de libros, metodo GET
 @app.route("/libros", methods=['GET'])
 def get_libros():
@@ -149,6 +152,67 @@ def delete_libro(id):
     finally:
         if conn:
             conn.close()
+
+
+###########-- Metodos CRUD para tabla Autores --###########
+
+@app.route("/autores", methods=['GET'])
+def get_autores():
+    conn = get_db_connection()
+    if conn is None:
+        return jsonify({'error':'There is not conection to the Data Base'}), 500
+    
+    cursor = conn.cursor()
+    query = """
+    SELECT
+	    [idAutor],
+	    [nameAutor],
+	    [apellidoAutor]
+    FROM [dbo].[tbAutores] WITH(NOLOCK)
+    """
+    cursor.execute(query)
+
+    autores = []
+
+    for row in cursor.fetchall():
+        autores.append({
+            "idAutor": row.idAutor,
+            "Nombre": f"{row.nameAutor} {row.apellidoAutor}"
+        })
+
+    conn.close()
+    return jsonify(autores) 
+
+# Agregar un nuevo autor metodo POST 
+@app.route("/autores", methods = ['POST'])
+def add_Autor():
+    nuevo_autor = request.get_json()
+
+    # Validación simple
+    if not nuevo_autor or 'idAutor' not in nuevo_autor or 'nameAutor' not in nuevo_autor or 'apellidoAutor' not in nuevo_autor:
+        return jsonify({'error': 'The fields idAutor, nameAutor and Lastname are required'}), 400
+    
+    conn = get_db_connection()
+    if conn is None:
+        return jsonify({'error':'No conection to the Data Base'}), 500
+    
+    cursor = conn.cursor()
+    query = "INSERT INTO tbAutores (idAutor, nameAutor, apellidoAutor) VALUES(?, ?, ?)"
+    try:
+        cursor.execute(
+            query,
+            nuevo_autor['idAutor'],
+            nuevo_autor['nameAutor'],
+            nuevo_autor['apellidoAutor'],
+        )
+        conn.commit()
+        return jsonify({'success':True}), 201
+    except Exception as ex:
+        return jsonify({'error':str(ex)}), 500
+
+    finally:
+        if conn:
+            conn.close() 
 
 # Para iniciar la app
      

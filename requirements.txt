@@ -1,4 +1,17 @@
-##pip install en la terminal
+
+#Crear un entorno virtual primero, En la terminal:
+# python -m venv venv
+# lo activamos con:
+# .\venv\Scripts\activate
+# se hace para que todas las dependencias y proyectos corran en un entorno virtual
+
+# despues instalar las dependencias:
+
+# pip install -r .\requirements.txt
+
+# si no se puede con este metodo se puede instalar una a una con
+
+## pip install FlasK  en la terminal
 
 Flask
 pyodbc
