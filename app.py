@@ -78,7 +78,7 @@ def add_libro():
         
         return jsonify({'error': str(ex)}), 500
     
-        # Esto siempre se ejecuta haya error o no, en este caso, cerrar la conexión para no tener que cerrarla en cada secuencia
+    # Esto siempre se ejecuta haya error o no, en este caso, cerrar la conexión para no tener que cerrarla en cada secuencia
     finally:
         if conn:
             conn.close()
@@ -106,7 +106,7 @@ def update_libro(id):
         # Pasar el nuevo titulo y el idLibro que viene en la URL
         cursor.execute(query, datos_actualizados['tituloLibro'], id)
 
-        # verificar si realmente se encontro el registro y se acualizo
+        # verificar si realmente se encontro el registro y se actualizó
         if cursor.rowcount == 0:
             conn.close()
             return jsonify({"error":"Libro no encontrado"}), 404
@@ -183,13 +183,14 @@ def get_autores():
     conn.close()
     return jsonify(autores) 
 
-# Agregar un nuevo autor metodo POST 
+## Agregar un nuevo autor metodo POST 
+
 @app.route("/autores", methods = ['POST'])
 def add_Autor():
     nuevo_autor = request.get_json()
 
     # Validación simple
-    if not nuevo_autor or 'idAutor' not in nuevo_autor or 'nameAutor' not in nuevo_autor or 'apellidoAutor' not in nuevo_autor:
+    if not nuevo_autor or 'nameAutor' not in nuevo_autor or 'apellidoAutor' not in nuevo_autor:
         return jsonify({'error': 'The fields idAutor, nameAutor and Lastname are required'}), 400
     
     conn = get_db_connection()
@@ -197,13 +198,12 @@ def add_Autor():
         return jsonify({'error':'No conection to the Data Base'}), 500
     
     cursor = conn.cursor()
-    query = "INSERT INTO tbAutores (idAutor, nameAutor, apellidoAutor) VALUES(?, ?, ?)"
+    query = "INSERT INTO tbAutores (nameAutor, apellidoAutor) VALUES(?, ?)"
     try:
         cursor.execute(
             query,
-            nuevo_autor['idAutor'],
             nuevo_autor['nameAutor'],
-            nuevo_autor['apellidoAutor'],
+            nuevo_autor['apellidoAutor']
         )
         conn.commit()
         return jsonify({'success':True}), 201
@@ -213,6 +213,80 @@ def add_Autor():
     finally:
         if conn:
             conn.close() 
+
+
+# Metodo PUT, para actualizar el nombre y apellido de un registro idAutor
+@app.route("/autores/<int:id>", methods = ['PUT'])
+def update_autores(id):
+    datos_actualizados = request.get_json()
+
+    # validacion verificar que almenos venga el titulo de libro 
+    if not datos_actualizados or 'nameAutor' not in datos_actualizados:
+        return jsonify({'error':'Falta el campo nameAutor'}), 400
+    
+    conn = get_db_connection()
+    if conn is None:
+        return jsonify({"error": "No hay conexión con la base de datos"}), 500
+    
+    cursor = conn.cursor()
+
+    # Aqui se pueden agregar los campos que se desean modificar
+    query = "UPDATE [tbAutores] SET [nameAutor] = ?, [apellidoAutor] = ? WHERE [idAutor] = ?"
+
+    try:
+        # Pasar el nuevo titulo y el idLibro que viene en la URL
+        cursor.execute(
+            query,
+            datos_actualizados['nameAutor'],
+            datos_actualizados['apellidoAutor'],
+            id)
+
+        # verificar si realmente se encontro el registro y se actualizó
+        if cursor.rowcount == 0:
+            conn.close()
+            return jsonify({"error":"Autor no encontrado"}), 404
+        
+        conn.commit()
+        #conn.close()
+        return jsonify({'success': True, 'message': 'Autor actualizado correctamente'}), 200
+    except Exception as ex:
+        #conn.close()
+        return jsonify({'error':str(ex)}), 500
+    
+    # Esto siempre se ejecuta haya error o no, en este caso, cerrar la conexión
+    finally:
+        if conn:
+            conn.close()
+
+
+# EndPoint Metodo Delete, se hace directo, solo recibe el idAutor
+
+@app.route("/autores/<int:id>", methods=['DELETE'])
+def delete_autores(id):
+    conn = get_db_connection()
+    if conn is None:
+        return jsonify({'error':'No hay conexión con la base de datos'}), 500
+    
+    cursor = conn.cursor()
+    query = "DELETE FROM tbAutores WHERE idAutor = ?"
+    
+    try:
+        cursor.execute(query, id)
+
+        if cursor.rowcount == 0:
+            return jsonify({'error':'Autor no encontrado'}), 404
+        
+        conn.commit()
+        return jsonify({'success': True, 'message': 'Autor eliminado con éxito'}), 200
+    
+    except Exception as ex:
+        
+        #si el libro esta prestado o referenciado en otra tabla, saltará al siguiente error de llave foranea
+        return jsonify({'error': f'No se puede eliminar, llave foranea: {str(ex)}'}), 500
+    
+    finally:
+        if conn:
+            conn.close()
 
 # Para iniciar la app
      
