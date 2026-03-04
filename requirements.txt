@@ -17,7 +17,7 @@ Flask
 pyodbc
 python-dotenv
 
-##para iniciar el proyecto:
+## para iniciar el proyecto:
 
 ## 1. iniciar el entorno virtual .\venv\Scripts\activate
 ## 2. para ejecutar el proyecto python .\app.py
@@ -35,20 +35,20 @@ python-dotenv
 
 # http://127.0.0.1:5000/libros
 
-{
-    "tituloLibro": "Diccionario Legua Chicago",
-    "anioPublicacion": 1612,
-    "idAutor": 2,
-    "idEditorial": 2
-}
+# {
+#   "tituloLibro": "Diccionario Legua Chicago",
+#    "anioPublicacion": 1612,
+#   "idAutor": 2,
+#    "idEditorial": 2
+# }
 
 # PUT: Aqui solo se puede actualizar un registro a la vez, cambia el nombre del campo tituloLibro:
 
 # http://127.0.0.1:5000/libros/3
 
-{
-	"tituloLibro": "Cuentos de Thomas Carrasquilla"
-}
+# {
+#	"tituloLibro": "Cuentos de Thomas Carrasquilla"
+# }
 
 # DELETE: solo se envia el idLibro a eliminar, en la url
 

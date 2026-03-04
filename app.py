@@ -288,6 +288,142 @@ def delete_autores(id):
         if conn:
             conn.close()
 
+
+###########-- Metodos CRUD para tabla Editoriales --###########
+
+@app.route("/editoriales", methods=['GET'])
+def get_Editorial():
+    conn = get_db_connection()
+    if conn is None:
+        return jsonify({'error':'There is not conection to the Data Base'}), 500
+    
+    cursor = conn.cursor()
+    query = """
+    SELECT 
+        [idEditorial],
+		[nameEditorial], 
+		[paisEditorial]
+	FROM [tbEditoriales] WITH (NOLOCK)
+    """
+    cursor.execute(query)
+
+    editoriales = []
+
+    for row in cursor.fetchall():
+        editoriales.append({
+            "nameEditorial": row.nameEditorial,
+            "paisEditorial": row.paisEditorial
+        })
+
+    conn.close()
+    return jsonify(editoriales) 
+
+## Agregar un nuevo autor metodo POST 
+
+@app.route("/editoriales", methods = ['POST'])
+def add_Editorial():
+    nuevo_editorial = request.get_json()
+
+    # Validación simple del json que envia el cliente
+    if not nuevo_editorial or 'nameEditorial' not in nuevo_editorial or 'paisEditorial' not in nuevo_editorial:
+        return jsonify({'error': 'The fields nameEditorial and Country are required'}), 400
+    
+    conn = get_db_connection()
+    if conn is None:
+        return jsonify({'error':'No conection to the Data Base'}), 500
+    
+    cursor = conn.cursor()
+    query = "INSERT INTO [tbEditoriales]([nameEditorial], [paisEditorial]) VALUES (?, ?)"
+    try:
+        cursor.execute(
+            query,
+            nuevo_editorial['nameEditorial'],
+            nuevo_editorial['paisEditorial']
+        )
+        conn.commit()
+        return jsonify({'success':True}), 201
+    except Exception as ex:
+        return jsonify({'error':str(ex)}), 500
+
+    finally:
+        if conn:
+            conn.close() 
+
+
+# Metodo PUT, para actualizar el nombre y apellido de un registro idAutor
+@app.route("/editoriales/<int:id>", methods = ['PUT'])
+def update_editorial(id):
+    datos_actualizados = request.get_json()
+
+    # validacion verificar que al menos venga el nombre de la editorial 
+    if not datos_actualizados or 'nameEditorial' not in datos_actualizados:
+        return jsonify({'error':'The field  nameEditorial is required'}), 400
+    
+    conn = get_db_connection()
+    if conn is None:
+        return jsonify({"error": "No hay conexión con la base de datos"}), 500
+    
+    cursor = conn.cursor()
+
+    # Aqui se pueden agregar los campos que se desean modificar
+    query = "UPDATE [tbEditoriales] SET [nameEditorial] = ?, [paisEditorial] = ? WHERE [idEditorial] = ?"
+
+    try:
+        # Pasar el nuevo editorial y el país que viene en la URL
+        cursor.execute(
+            query,
+            datos_actualizados['nameEditorial'],
+            datos_actualizados['paisEditorial'],
+            id)
+
+        # verificar si realmente se encontro el registro y se actualizó
+        if cursor.rowcount == 0:
+            conn.close()
+            return jsonify({"error":"Editorial no encontrado"}), 404
+        
+        conn.commit()
+        return jsonify({'success': True, 'message': 'Editorial actualizado correctamente'}), 200
+
+    except Exception as ex:
+
+        return jsonify({'error':str(ex)}), 500
+    
+    # Esto siempre se ejecuta haya error o no, en este caso, cerrar la conexión
+    finally:
+        if conn:
+            conn.close()
+
+
+# EndPoint Metodo Delete, se hace directo, solo recibe el idAutor
+
+@app.route("/editoriales/<int:id>", methods=['DELETE'])
+def delete_editorial(id):
+    conn = get_db_connection()
+    if conn is None:
+        return jsonify({'error':'No hay conexión con la base de datos'}), 500
+    
+    cursor = conn.cursor()
+    query = "DELETE FROM tbEditoriales WHERE idEditorial = ?"
+    
+    try:
+        cursor.execute(query, id)
+
+        if cursor.rowcount == 0:
+            return jsonify({'error':'Editorial no encontrado'}), 404
+        
+        conn.commit()
+        return jsonify({'success': True, 'message': 'Editorial eliminado con éxito'}), 200
+    
+    except Exception as ex:
+        
+        #si el libro esta prestado o referenciado en otra tabla, saltará al siguiente error de llave foranea
+        return jsonify({'error': f'No se puede eliminar Editorial, llave foranea: {str(ex)}'}), 500
+    
+    finally:
+        if conn:
+            conn.close()
+
+
 # Para iniciar la app
      
 if __name__ == "__main__":
