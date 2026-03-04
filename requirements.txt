@@ -1,4 +1,4 @@
-
+# vídeo apoyo http://127.0.0.1:5000/editoriales
 #Crear un entorno virtual primero, En la terminal:
 # python -m venv venv
 # lo activamos con:
